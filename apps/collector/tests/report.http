@@ -1,0 +1,33 @@
+POST http://localhost:8085/report
+Content-Type: application/json
+
+{
+  "source": "sender",
+  "instance": "sender-4",
+  "clients": 100,
+  "messages": 100,
+  "volume": 50000
+}
+###
+POST http://localhost:8085/report
+Content-Type: application/json
+
+{
+  "source": "sender",
+  "instance": "sender-2",
+  "clients": 100,
+  "messages": 100,
+  "volume": 50000
+}
+###
+POST http://localhost:8085/report
+Content-Type: application/json
+
+{
+  "source": "sender",
+  "instance": "sender-4",
+  "clients": 100,
+  "messages": 100,
+  "volume": 50000
+}
+###
