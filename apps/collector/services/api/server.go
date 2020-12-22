@@ -51,8 +51,9 @@ func Start(ctx context.Context, collector *collector.Collector, port int) (*Serv
 		return c.JSONPretty(200, s.collector.Top(), "\t")
 
 	})
-	s.echoWebServer.GET("/bucket/:source", func(c echo.Context) error {
+	s.echoWebServer.GET("/bucket", func(c echo.Context) error {
 		count, _ := strconv.Atoi(c.QueryParam("count"))
+
 		return c.JSONPretty(200, s.collector.Bucket(c.Param("source"), count), "\t")
 	})
 	errCh := make(chan error, 1)

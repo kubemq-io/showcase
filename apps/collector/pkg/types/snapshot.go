@@ -14,24 +14,26 @@ type State struct {
 	Errors    int64     `json:"errors"`
 }
 type Delta struct {
-	Duration  float64
-	Instances int
-	Clients   int
-	Messages  int64
-	Volume    int64
-	Errors    int64
+	Duration  float64 `json:"duration"`
+	Instances int     `json:"instances"`
+	Clients   int     `json:"clients"`
+	Messages  int64   `json:"messages"`
+	Volume    int64   `json:"volume"`
+	Errors    int64   `json:"errors"`
 }
 type Snapshot struct {
-	Source  string
-	Start   *State
-	End     *State
-	Changed *Delta
+	Source  string `json:"source"`
+	Group   string `json:"group"`
+	Start   *State `json:"start"`
+	End     *State `json:"end"`
+	Changed *Delta `json:"changed"`
 }
 
 func (s *Snapshot) String() string {
 	return fmt.Sprintf(
-		"Source: %s, Instances: %d, Senders: %d, Messages: %d, Volume: %d, Errors: %d",
+		"Source: %s, Group: %s, Instances: %d, Senders: %d, Messages: %d, Volume: %d, Errors: %d",
 		s.Source,
+		s.Group,
 		s.End.Instances,
 		s.End.Clients,
 		s.End.Messages,

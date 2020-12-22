@@ -14,19 +14,22 @@ type Aggregator struct {
 	LastUpdate   time.Time
 	LastSnapshot *Snapshot
 	Source       string
+	Group        string
 	Instances    map[string]int
 	Messages     *atomic.Int64
 	Volume       *atomic.Int64
 	Errors       *atomic.Int64
 }
 
-func NewAggregator(source string) *Aggregator {
+func NewAggregator(source, group string) *Aggregator {
 	return &Aggregator{
 		Mutex:  sync.Mutex{},
-		logger: logger.NewLogger(fmt.Sprintf("aggregator-%s", source)),
+		logger: logger.NewLogger(fmt.Sprintf("aggregator-%s-%s", source, group)),
 		Source: source,
+		Group:  group,
 		LastSnapshot: &Snapshot{
 			Source: source,
+			Group:  group,
 			Start: &State{
 				Time:      time.Now().UTC(),
 				Instances: 0,
@@ -92,6 +95,7 @@ func (a *Aggregator) Snapshot() *Snapshot {
 	}
 	s := &Snapshot{
 		Source: a.Source,
+		Group:  a.Group,
 		Start: &State{
 			Time:      a.LastSnapshot.End.Time,
 			Instances: a.LastSnapshot.End.Instances,

@@ -29,6 +29,7 @@ func NewClientStats() *ClientStats {
 type Stats struct {
 	cfg         *Config
 	Source      string
+	Group       string
 	Instance    string
 	Senders     int
 	Messages    *atomic.Int64
@@ -45,7 +46,8 @@ func CreateStats(cfg *Config) *Stats {
 	hostName, _ := os.Hostname()
 	s := &Stats{
 		cfg:         cfg,
-		Source:      "sender",
+		Source:      cfg.Source,
+		Group:       cfg.Group,
 		Instance:    hostName,
 		Senders:     cfg.Senders,
 		Messages:    atomic.NewInt64(0),
@@ -79,6 +81,7 @@ func (s *Stats) CollectStats(clients []StatsInterface) *Stats {
 func (s *Stats) ReportStats() *Stats {
 	currentMetric := &Metric{
 		Source:   s.Source,
+		Group:    s.Group,
 		Instance: s.Instance,
 		Clients:  s.cfg.Senders,
 		Messages: s.Messages.Load(),
@@ -87,6 +90,7 @@ func (s *Stats) ReportStats() *Stats {
 	}
 	reportMetric := &Metric{
 		Source:   s.Source,
+		Group:    s.Group,
 		Instance: s.Instance,
 		Clients:  s.cfg.Senders,
 		Messages: currentMetric.Messages - s.lastMetric.Messages,
@@ -110,12 +114,14 @@ func (s *Stats) Print() {
 	s.lastSend = currentSent
 	log.Println(fmt.Sprintf(
 		"Source: %s, "+
+			"Group: %s, "+
 			"Instance: %s, "+
 			"Duration: %s, "+
 			"Messages: %d, "+
 			"Volume: %d, "+
 			"Errors: %d ",
 		s.Source,
+		s.Group,
 		s.Instance,
 		time.Since(s.startAt).Round(time.Second),
 		s.Messages.Load(),
@@ -125,6 +131,7 @@ func (s *Stats) Print() {
 
 type Metric struct {
 	Source   string `json:"source"`
+	Group    string `json:"group"`
 	Instance string `json:"instance"`
 	Clients  int    `json:"clients"`
 	Messages int64  `json:"messages"`

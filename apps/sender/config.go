@@ -8,6 +8,8 @@ import (
 )
 
 type Config struct {
+	Source            string
+	Group             string
 	Hosts             string
 	Type              string
 	Channel           string
@@ -26,9 +28,11 @@ type Config struct {
 }
 
 var (
+	_ = pflag.String("source", "sender", "set source")
+	_ = pflag.String("group", "senders", "set group")
 	_ = pflag.String("hosts", "localhost:50000", "set hosts")
 	_ = pflag.String("channel", nuid.Next(), "set channel")
-	_ = pflag.String("type", "queue", "set loader type")
+	_ = pflag.String("type", "store", "set loader type")
 	_ = pflag.String("clientId", "test-command-client-id", "set clientId")
 	_ = pflag.Int("senders", 100, "set senders")
 	_ = pflag.Int("channel-start-range", 0, "set channel start range")
@@ -46,6 +50,8 @@ var (
 func LoadConfig() (*Config, error) {
 	pflag.Parse()
 	cfg := &Config{}
+	viper.BindEnv("Source", "SOURCE")
+	viper.BindEnv("Group", "GROUP")
 	viper.BindEnv("Hosts", "HOSTS")
 	viper.BindEnv("Channel", "CHANNEL")
 	viper.BindEnv("Type", "TYPE")
@@ -63,6 +69,8 @@ func LoadConfig() (*Config, error) {
 	viper.BindEnv("Verbose", "VERBOSE")
 	viper.BindEnv("CollectorUrl", "COLLECTOR-URL")
 
+	viper.BindPFlag("Source", pflag.CommandLine.Lookup("source"))
+	viper.BindPFlag("Group", pflag.CommandLine.Lookup("group"))
 	viper.BindPFlag("Hosts", pflag.CommandLine.Lookup("hosts"))
 	viper.BindPFlag("Type", pflag.CommandLine.Lookup("type"))
 	viper.BindPFlag("Channel", pflag.CommandLine.Lookup("channel"))
@@ -88,6 +96,8 @@ func LoadConfig() (*Config, error) {
 }
 
 func (c *Config) Print() {
+	log.Println("Source->", c.Source)
+	log.Println("Group->", c.Group)
 	log.Println("Hosts->", c.Hosts)
 	log.Println("Type->", c.Type)
 	log.Println("Channel->", c.Channel)

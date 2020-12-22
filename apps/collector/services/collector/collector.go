@@ -2,7 +2,9 @@ package collector
 
 import (
 	"context"
+	"fmt"
 	"github.com/kubemq-io/showcase/apps/collector/pkg/types"
+	"strings"
 	"sync"
 	"time"
 )
@@ -26,30 +28,35 @@ func NewCollector(ctx context.Context) (*Collector, error) {
 }
 
 func (c *Collector) Aggregate(m *types.Metric) {
-	val, ok := c.Aggregators.Load(m.Source)
+	key := fmt.Sprintf("%s/%s", m.Source, m.Group)
+	val, ok := c.Aggregators.Load(key)
 	if ok {
 		agg := val.(*types.Aggregator)
 		agg.Add(m)
 	} else {
-		agg := types.NewAggregator(m.Source)
-		c.Aggregators.Store(m.Source, agg)
+		agg := types.NewAggregator(m.Source, m.Group)
+		c.Aggregators.Store(key, agg)
 		agg.Add(m)
 	}
 
 }
-func (c *Collector) Clear(source string) {
-	val, ok := c.Aggregators.Load(source)
+func (c *Collector) Clear(source, group string) {
+	key := fmt.Sprintf("%s/%s", source, group)
+	val, ok := c.Aggregators.Load(key)
 	if ok {
 		agg := val.(*types.Aggregator)
-		c.snapshot(source, agg)
+		c.snapshot(group, agg)
 		agg.Clear()
 	}
 }
 func (c *Collector) ClearAll() {
 	c.Aggregators.Range(func(key, value interface{}) bool {
-		source, agg := key.(string), value.(*types.Aggregator)
-		c.snapshot(source, agg)
-		agg.Clear()
+		val, agg := key.(string), value.(*types.Aggregator)
+		sourceGroup := strings.Split(val, "/")
+		if len(sourceGroup) == 2 {
+			c.snapshot(sourceGroup[1], agg)
+			agg.Clear()
+		}
 		return true
 	})
 }
@@ -62,8 +69,8 @@ func (c *Collector) Top() []*types.Snapshot {
 	})
 	return list
 }
-func (c *Collector) Bucket(source string, count int) []*types.Snapshot {
-	val, ok := c.Buckets.Load(source)
+func (c *Collector) Bucket(name string, count int) []*types.Snapshot {
+	val, ok := c.Buckets.Load(name)
 	if ok {
 		return val.(*types.Bucket).List(count)
 	}
@@ -72,20 +79,23 @@ func (c *Collector) Bucket(source string, count int) []*types.Snapshot {
 
 func (c *Collector) processSnapshots() {
 	c.Aggregators.Range(func(key, value interface{}) bool {
-		source, agg := key.(string), value.(*types.Aggregator)
-		c.snapshot(source, agg)
+		val, agg := key.(string), value.(*types.Aggregator)
+		sourceGroup := strings.Split(val, "/")
+		if len(sourceGroup) == 2 {
+			c.snapshot(sourceGroup[1], agg)
+		}
 		return true
 	})
 }
 
-func (c *Collector) snapshot(source string, agg *types.Aggregator) {
-	val, ok := c.Buckets.Load(source)
+func (c *Collector) snapshot(key string, agg *types.Aggregator) {
+	val, ok := c.Buckets.Load(key)
 	if ok {
 		bucket := val.(*types.Bucket)
 		bucket.Append(agg.Snapshot())
 	} else {
-		bucket := types.NewBucket(source)
-		c.Buckets.Store(source, bucket)
+		bucket := types.NewBucket(key)
+		c.Buckets.Store(key, bucket)
 		bucket.Append(agg.Snapshot())
 	}
 }

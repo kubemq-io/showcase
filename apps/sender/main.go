@@ -72,35 +72,35 @@ func runQueueLoader(ctx context.Context, cfg *Config, doneCh chan bool) {
 	}
 }
 
-//
-//func runStoreLoader(ctx context.Context, cfg *Config, doneCh chan bool) {
-//	storeCtx, cancel := context.WithCancel(ctx)
-//	defer cancel()
-//	appStats := CreateStats("Store", cfg)
-//	var clients []StatsInterface
-//	for i := 1; i <= cfg.Senders; i++ {
-//		log.Println(fmt.Sprintf("loading store client %d", i))
-//		client := NewStoreClient(storeCtx, i, cfg)
-//		clients = append(clients, client)
-//		time.Sleep(time.Duration(cfg.LoadInterval) * time.Millisecond)
-//		select {
-//		case <-doneCh:
-//			return
-//		default:
-//
-//		}
-//	}
-//	for {
-//		select {
-//		case <-time.After(time.Duration(cfg.CollectEvery) * time.Second):
-//			appStats.CollectStats(clients).Print()
-//		case <-doneCh:
-//			return
-//		case <-storeCtx.Done():
-//			return
-//		}
-//	}
-//}
+func runStoreLoader(ctx context.Context, cfg *Config, doneCh chan bool) {
+	storeCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	appStats := CreateStats(cfg)
+	var clients []StatsInterface
+	for i := 1; i <= cfg.Senders; i++ {
+		log.Println(fmt.Sprintf("loading store client %d", i))
+		client := NewStoreClient(storeCtx, i, cfg, getPayload(cfg.PayloadSize, cfg.PayloadFile))
+		clients = append(clients, client)
+		time.Sleep(time.Duration(cfg.LoadInterval) * time.Millisecond)
+		select {
+		case <-doneCh:
+			return
+		default:
+
+		}
+	}
+	for {
+		select {
+		case <-time.After(time.Duration(cfg.CollectEvery) * time.Second):
+			appStats.CollectStats(clients).Print()
+			go appStats.ReportStats()
+		case <-doneCh:
+			return
+		case <-storeCtx.Done():
+			return
+		}
+	}
+}
 
 func main() {
 	var gracefulShutdown = make(chan os.Signal, 1)
@@ -118,8 +118,8 @@ func main() {
 	switch cfg.Type {
 	case "queue", "queues":
 		go runQueueLoader(ctx, cfg, doneCh)
-	//case "store", "st", "events_store":
-	//	go runStoreLoader(ctx, cfg, doneCh)
+	case "store", "st", "events_store":
+		go runStoreLoader(ctx, cfg, doneCh)
 	default:
 		fmt.Println("no valid type defined, aborting")
 		return

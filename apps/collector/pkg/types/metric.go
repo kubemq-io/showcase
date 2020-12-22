@@ -2,6 +2,7 @@ package types
 
 type Metric struct {
 	Source   string `json:"source"`
+	Group    string `json:"group"`
 	Instance string `json:"instance"`
 	Clients  int    `json:"clients"`
 	Messages int64  `json:"messages"`
