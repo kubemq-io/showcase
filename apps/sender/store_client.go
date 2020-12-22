@@ -91,6 +91,7 @@ func (c *StoreClient) runWorker(ctx context.Context, address string) {
 					for _, event := range events {
 						select {
 						case sendCh <- event:
+							c.stats.Volume.Add(int64(len(event.Body)))
 						case <-ctx.Done():
 							return
 						default:

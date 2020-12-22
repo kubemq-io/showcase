@@ -4,52 +4,31 @@ import (
 	"context"
 	"fmt"
 	"github.com/kubemq-io/kubemq-go"
-	"io/ioutil"
 	"log"
-	"math/rand"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 )
 
-var randNum = rand.New(rand.NewSource(time.Now().UnixNano()))
-
-func randomBytes(n int) []byte {
-	r := make([]byte, n)
-	if _, err := randNum.Read(r); err != nil {
-		panic("rand.Read failed: " + err.Error())
-	}
-	return r
-}
-
 func getClient(ctx context.Context, host string, port int, clientId string) (*kubemq.Client, error) {
 	return kubemq.NewClient(ctx,
 		kubemq.WithAddress(host, port),
 		kubemq.WithClientId(clientId),
+		kubemq.WithAutoReconnect(true),
+		kubemq.WithReconnectInterval(time.Second),
 		kubemq.WithTransportType(kubemq.TransportTypeGRPC))
 
 }
-func getPayload(size int, fileName string) []byte {
 
-	if fileName != "" {
-		data, err := ioutil.ReadFile(fileName)
-		if err == nil && len(data) != 0 {
-			return data
-		}
-	}
-	return randomBytes(size)
-
-}
-
-func runQueueSenders(ctx context.Context, cfg *Config, doneCh chan bool) {
+func runQueueReceivers(ctx context.Context, cfg *Config, doneCh chan bool) {
 	queueCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	appStats := CreateStats(cfg)
 	var clients []StatsInterface
-	for i := 1; i <= cfg.Senders; i++ {
+	for i := 1; i <= cfg.Receivers; i++ {
 		log.Println(fmt.Sprintf("loading queue client %d", i))
-		client := NewQueueClient(queueCtx, i+cfg.ChannelStartRange, cfg, getPayload(cfg.PayloadSize, cfg.PayloadFile))
+		client := NewQueueClient(queueCtx, i+cfg.ChannelStartRange, cfg)
 		clients = append(clients, client)
 		time.Sleep(time.Duration(cfg.LoadInterval) * time.Millisecond)
 		select {
@@ -72,14 +51,14 @@ func runQueueSenders(ctx context.Context, cfg *Config, doneCh chan bool) {
 	}
 }
 
-func runStoreSenders(ctx context.Context, cfg *Config, doneCh chan bool) {
+func runStoreReceivers(ctx context.Context, cfg *Config, doneCh chan bool) {
 	storeCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	appStats := CreateStats(cfg)
 	var clients []StatsInterface
-	for i := 1; i <= cfg.Senders; i++ {
+	for i := 1; i <= cfg.Receivers; i++ {
 		log.Println(fmt.Sprintf("loading store client %d", i))
-		client := NewStoreClient(storeCtx, i, cfg, getPayload(cfg.PayloadSize, cfg.PayloadFile))
+		client := NewStoreClient(storeCtx, i, cfg)
 		clients = append(clients, client)
 		time.Sleep(time.Duration(cfg.LoadInterval) * time.Millisecond)
 		select {
@@ -117,9 +96,9 @@ func main() {
 	doneCh := make(chan bool)
 	switch cfg.Type {
 	case "queue", "queues":
-		go runQueueSenders(ctx, cfg, doneCh)
+		go runQueueReceivers(ctx, cfg, doneCh)
 	case "store", "st", "events_store":
-		go runStoreSenders(ctx, cfg, doneCh)
+		go runStoreReceivers(ctx, cfg, doneCh)
 	default:
 		fmt.Println("no valid type defined, aborting")
 		return

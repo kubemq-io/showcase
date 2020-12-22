@@ -1,0 +1,41 @@
+# github.com/go-task/task
+
+version: '2'
+
+vars:
+  BINARY_NAME: showcase-receiver
+  VERSION: v0.1.0
+
+tasks:
+  default:
+    cmds:
+      - go run .
+  build:
+    env:
+      GOOS: '{{OS}}'
+      GOARCH: '{{ARCH}}'
+    cmds:
+      - go mod tidy
+      - go mod vendor
+      - go build -buildmode=exe -o "{{.BINARY_NAME}}.exe" -ldflags "-X main.version={{.VERSION}}"
+  clean:
+    cmds:
+      - go clean
+  docker:
+    cmds:
+      - go mod tidy
+      - go mod vendor
+      - docker build . -t kubemq/{{.BINARY_NAME}}:{{.VERSION}}
+
+    vars:
+  rundocker:
+    cmds:
+      - docker run -it --rm -e HOST=165.227.255.104 -e CHANNEL=q1 -e CLIENTS=10 kubemq/{{.BINARY_NAME}}:{{.VERSION}}
+  push:
+    cmds:
+      - docker push kubemq/{{.BINARY_NAME}}:{{.VERSION}}
+  release:
+     cmds:
+      - task: build
+      - task: docker
+      - task: push

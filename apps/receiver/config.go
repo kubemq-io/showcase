@@ -15,33 +15,31 @@ type Config struct {
 	Channel           string
 	ChannelStartRange int
 	ClientId          string
-	Senders           int
-	SendBatch         int
-	SendInterval      int
+	Receivers         int
+	ReceiveBatch      int
+	ReceiveTimeout    int
+	ReceiveGroup      string
 	LoadInterval      int
 	KillAfter         int
-	PayloadSize       int
-	PayloadFile       string
 	CollectEvery      int
 	Verbose           bool
 	CollectorUrl      string
 }
 
 var (
-	_ = pflag.String("source", "sender", "set source")
-	_ = pflag.String("group", "senders", "set group")
+	_ = pflag.String("source", "receiver", "set source")
+	_ = pflag.String("group", "receivers", "set group")
 	_ = pflag.String("hosts", "localhost:50000", "set hosts")
 	_ = pflag.String("channel", nuid.Next(), "set channel")
 	_ = pflag.String("type", "store", "set loader type")
 	_ = pflag.String("clientId", "test-command-client-id", "set clientId")
-	_ = pflag.Int("senders", 100, "set senders")
+	_ = pflag.Int("receivers", 100, "set receivers")
 	_ = pflag.Int("channel-start-range", 0, "set channel start range")
-	_ = pflag.Int("sendBatch", 1, "set sendBatch")
-	_ = pflag.Int("sendInterval", 1, "set sendInterval")
+	_ = pflag.Int("receiveBatch", 1, "set sendBatch")
+	_ = pflag.Int("receiveTimeout", 60, "set receive timeout")
+	_ = pflag.String("receiveGroup", "g1", "set receive group")
 	_ = pflag.Int("loadInterval", 100, "set loadInterval")
 	_ = pflag.Int("killAfter", 0, "set killAfter")
-	_ = pflag.Int("payloadSize", 100, "set payloadSize")
-	_ = pflag.String("payloadFile", "", "set payload file")
 	_ = pflag.Int("collectEvery", 5, "set collectEvery")
 	_ = pflag.Bool("verbose", false, "set verbose")
 	_ = pflag.String("collector-url", "http://localhost:8085", "set collector url")
@@ -57,13 +55,12 @@ func LoadConfig() (*Config, error) {
 	viper.BindEnv("Type", "TYPE")
 	viper.BindEnv("ClientId", "CLIENT_ID")
 	viper.BindEnv("ChannelStartRange", "CHANNEL-START-RANGE")
-	viper.BindEnv("Senders", "SENDERS")
-	viper.BindEnv("SendBatch", "SEND_BATCH")
-	viper.BindEnv("SendInterval", "SEND_INTERVAL")
+	viper.BindEnv("Receivers", "RECEIVERS")
+	viper.BindEnv("ReceiveBatch", "RECEIVE_BATCH")
+	viper.BindEnv("ReceiveTimeout", "RECEIVE_TIMEOUT")
+	viper.BindEnv("ReceiveGroup", "RECEIVE_GROUP")
 	viper.BindEnv("LoadInterval", "LOAD_INTERVAL")
 	viper.BindEnv("KillAfter", "KILL_AFTER")
-	viper.BindEnv("PayloadSize", "PAYLOAD_SIZE")
-	viper.BindEnv("PayloadFile", "PAYLOAD_File")
 	viper.BindEnv("CollectEvery", "COLLECT_EVERY")
 	viper.BindEnv("Verbose", "VERBOSE")
 	viper.BindEnv("CollectorUrl", "COLLECTOR-URL")
@@ -75,13 +72,12 @@ func LoadConfig() (*Config, error) {
 	viper.BindPFlag("Channel", pflag.CommandLine.Lookup("channel"))
 	viper.BindPFlag("ChannelStartRange", pflag.CommandLine.Lookup("channel-start-range"))
 	viper.BindPFlag("ClientId", pflag.CommandLine.Lookup("clientId"))
-	viper.BindPFlag("Senders", pflag.CommandLine.Lookup("senders"))
-	viper.BindPFlag("SendBatch", pflag.CommandLine.Lookup("sendBatch"))
-	viper.BindPFlag("SendInterval", pflag.CommandLine.Lookup("sendInterval"))
+	viper.BindPFlag("Receivers", pflag.CommandLine.Lookup("receivers"))
+	viper.BindPFlag("ReceiveBatch", pflag.CommandLine.Lookup("receiveBatch"))
+	viper.BindPFlag("ReceiveTimeout", pflag.CommandLine.Lookup("receiveTimeout"))
+	viper.BindPFlag("ReceiveGroup", pflag.CommandLine.Lookup("receiveGroup"))
 	viper.BindPFlag("LoadInterval", pflag.CommandLine.Lookup("loadInterval"))
 	viper.BindPFlag("KillAfter", pflag.CommandLine.Lookup("killAfter"))
-	viper.BindPFlag("PayloadSize", pflag.CommandLine.Lookup("payloadSize"))
-	viper.BindPFlag("PayloadFile", pflag.CommandLine.Lookup("payloadFile"))
 	viper.BindPFlag("CollectEvery", pflag.CommandLine.Lookup("collectEvery"))
 	viper.BindPFlag("Verbose", pflag.CommandLine.Lookup("verbose"))
 	viper.BindPFlag("CollectorUrl", pflag.CommandLine.Lookup("collector-url"))
@@ -102,13 +98,12 @@ func (c *Config) Print() {
 	log.Println("Channel->", c.Channel)
 	log.Println("Channel Start Range->", c.ChannelStartRange)
 	log.Println("ClientId->", c.ClientId)
-	log.Println("Senders->", c.Senders)
-	log.Println("SendBatch->", c.SendBatch)
-	log.Println("SendInterval->", c.SendInterval)
+	log.Println("Receivers->", c.Receivers)
+	log.Println("ReceiveBatch->", c.ReceiveBatch)
+	log.Println("ReceiveTimout->", c.ReceiveTimeout)
+	log.Println("ReceiveGroup->", c.ReceiveGroup)
 	log.Println("LoadInterval->", c.LoadInterval)
 	log.Println("KillAfter->", c.KillAfter)
-	log.Println("PayloadSize->", c.PayloadSize)
-	log.Println("PayloadFile->", c.PayloadFile)
 	log.Println("CollectEvery->", c.CollectEvery)
 	log.Println("Verbose->", c.Verbose)
 	log.Println("CollectorUrl->", c.CollectorUrl)
