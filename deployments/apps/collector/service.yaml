@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: collector
+  labels:
+    app: collector
+spec:
+  ports:
+    - name: api-port
+      protocol: TCP
+      port: 8085
+      targetPort: 8085
+  selector:
+    app: collector
+  type: ClusterIP

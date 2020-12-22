@@ -1,0 +1,23 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: receiver
+  labels:
+    app: receiver
+data:
+  SOURCE: 'receiver'
+  GROUP: 'receivers'
+  HOSTS: 'kubemq-cluster-1-grpc-internal.kubemq:50000'
+  CHANNEL: 'q1'
+  TYPE: 'queue'
+  CLIENT_ID: ''
+  CHANNEL-START-RANGE: '0'
+  RECEIVERS: '100'
+  RECEIVE_BATCH: '1024'
+  RECEIVE_TIMEOUT: '5'
+  RECEIVE_GROUP: 'g1'
+  LOAD_INTERVAL: '100'
+  KILL_AFTER: '0'
+  COLLECT_EVERY: '5'
+  VERBOSE: 'false'
+  COLLECTOR-URL: 'http://collector.apps:8085'

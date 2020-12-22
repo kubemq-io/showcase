@@ -1,0 +1,14 @@
+version: '3'
+
+tasks:
+  default:
+    cmds:
+      - kubectl apply -f ./deployment.yaml -n apps
+      - kubectl apply -f ./service.yaml -n apps
+  expose:
+    cmds:
+      - kubectl port-forward svc/collector -n apps 8085:8085
+  delete:
+    cmds:
+      - kubectl delete -f ./deployment.yaml -n apps
+      - kubectl delete -f ./delete.yaml -n apps

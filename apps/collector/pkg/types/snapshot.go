@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"github.com/kubemq-io/showcase/apps/collector/pkg/utils"
 	"time"
 )
 
@@ -31,13 +32,13 @@ type Snapshot struct {
 
 func (s *Snapshot) String() string {
 	return fmt.Sprintf(
-		"Source: %s, Group: %s, Instances: %d, Senders: %d, Messages: %d, Volume: %d, Errors: %d",
+		"Source: %s, Group: %s, Instances: %d, Clients: %d, Messages: %d, Volume: %s, Errors: %d",
 		s.Source,
 		s.Group,
 		s.End.Instances,
 		s.End.Clients,
 		s.End.Messages,
-		s.End.Volume,
+		utils.ByteCount(s.End.Volume),
 		s.End.Errors,
 	)
 }

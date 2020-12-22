@@ -119,14 +119,14 @@ func (s *Stats) Print() {
 			"Instance: %s, "+
 			"Duration: %s, "+
 			"Messages: %d, "+
-			"Volume: %d, "+
+			"Volume: %s, "+
 			"Errors: %d ",
 		s.Source,
 		s.Group,
 		s.Instance,
 		time.Since(s.startAt).Round(time.Second),
 		s.Messages.Load(),
-		s.Volume.Load(),
+		ByteCount(s.Volume.Load()),
 		s.Errors.Load()))
 }
 
@@ -138,4 +138,18 @@ type Metric struct {
 	Messages int64  `json:"messages"`
 	Volume   int64  `json:"volume"`
 	Errors   int64  `json:"errors"`
+}
+
+func ByteCount(b int64) string {
+	const unit = 1000
+	if b < unit {
+		return fmt.Sprintf("%d B", b)
+	}
+	div, exp := int64(unit), 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %cB",
+		float64(b)/float64(div), "kMGTPE"[exp])
 }

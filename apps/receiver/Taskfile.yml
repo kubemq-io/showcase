@@ -4,7 +4,7 @@ version: '2'
 
 vars:
   BINARY_NAME: showcase-receiver
-  VERSION: v0.1.0
+  VERSION: v0.1.1
 
 tasks:
   default:
@@ -26,11 +26,6 @@ tasks:
       - go mod tidy
       - go mod vendor
       - docker build . -t kubemq/{{.BINARY_NAME}}:{{.VERSION}}
-
-    vars:
-  rundocker:
-    cmds:
-      - docker run -it --rm -e HOST=165.227.255.104 -e CHANNEL=q1 -e CLIENTS=10 kubemq/{{.BINARY_NAME}}:{{.VERSION}}
   push:
     cmds:
       - docker push kubemq/{{.BINARY_NAME}}:{{.VERSION}}

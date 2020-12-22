@@ -1,0 +1,79 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: kubemq-cluster-1-grpc-external
+  labels:
+    app: kubemq-cluster-1
+spec:
+  ports:
+    - name: grpc-port
+      protocol: TCP
+      port: 50000
+      targetPort: 50000
+  selector:
+    app: kubemq-cluster-1
+  type: NodePort
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: kubemq-cluster-1-grpc-internal
+  labels:
+    app: kubemq-cluster-1
+spec:
+  ports:
+    - name: grpc-port
+      protocol: TCP
+      port: 50000
+      targetPort: 50000
+  selector:
+    app: kubemq-cluster-1
+  type: ClusterIP
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: kubemq-cluster-1-grpc-headless
+  labels:
+    app: kubemq-cluster-1
+spec:
+  ports:
+    - name: grpc-port
+      protocol: TCP
+      port: 50000
+      targetPort: 50000
+  selector:
+    app: kubemq-cluster-1
+  clusterIP: None
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: kubemq-cluster-1-api-internal
+  labels:
+    app: kubemq-cluster-1
+spec:
+  ports:
+    - name: api-port
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: kubemq-cluster-1
+  type: ClusterIP
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: kubemq-cluster-1-api-headless
+  labels:
+    app: kubemq-cluster-1
+spec:
+  ports:
+    - name: api-port
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: kubemq-cluster-1
+  clusterIP: None

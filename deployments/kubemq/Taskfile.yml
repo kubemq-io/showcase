@@ -1,0 +1,19 @@
+version: '3'
+
+tasks:
+  init:
+    cmds:
+      - kubectl apply -f ./init.yaml
+  deploy:
+    cmds:
+      - kubectl apply -f ./statefulset.yaml -n kubemq
+      - kubectl apply -f ./config.yaml -n kubemq
+      - kubectl apply -f ./service.yaml -n kubemq
+      - kubectl apply -f ./secret.yaml -n kubemq
+  delete:
+    cmds:
+      - kubectl delete -f ./statefulset.yaml -n kubemq
+      - kubectl delete -f ./config.yaml -n kubemq
+      - kubectl delete -f ./service.yaml -n kubemq
+      - kubectl delete -f ./secret.yaml -n kubemq
+

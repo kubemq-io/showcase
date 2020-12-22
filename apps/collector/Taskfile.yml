@@ -4,7 +4,7 @@ version: '3'
 
 vars:
   BINARY_NAME: showcase-collector
-  VERSION: v0.1.0
+  VERSION: v0.1.1
 
 tasks:
   default:
@@ -27,18 +27,6 @@ tasks:
       - go mod tidy
       - go mod vendor
       - go build -buildmode=exe -o "{{.BINARY_NAME}}.exe" -ldflags "-X main.version={{.VERSION}}"
-  build-386:
-    env:
-      GOOS: linux
-      GOARCH: 386
-    cmds:
-      - go mod tidy
-      - go mod vendor
-      - go build -o "{{.BINARY_NAME}}.exe" -ldflags "-X main.version={{.VERSION}}"
-  docker-builder:
-    cmds:
-      - docker build . -f Docker_builder kubemq/gobuilder-ubuntu
-      - docker push kubemq/gobuilder-ubuntu
   docker:
     env:
       GOOS: linux
@@ -54,7 +42,6 @@ tasks:
       - docker push kubemq/{{.BINARY_NAME}}:latest
   release:
     cmds:
-      - go mod vendor
       - task: lint
       - task: docker
       - task: push

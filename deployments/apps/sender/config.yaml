@@ -1,0 +1,24 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: sender
+  labels:
+    app: sender
+data:
+  SOURCE: 'sender'
+  GROUP: 'senders'
+  HOSTS: 'kubemq-cluster-1-grpc-internal.kubemq:50000'
+  CHANNEL: 'q1'
+  TYPE: 'queue'
+  CLIENT_ID: ''
+  CHANNEL-START-RANGE: '0'
+  SENDERS: '100'
+  SEND_BATCH: '15'
+  SEND_INTERVAL: '1'
+  LOAD_INTERVAL: '100'
+  KILL_AFTER: '0'
+  PAYLOAD_SIZE: '5000'
+  PAYLOAD_File: ''
+  COLLECT_EVERY: '5'
+  VERBOSE: 'false'
+  COLLECTOR-URL: 'http://collector.apps:8085'

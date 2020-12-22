@@ -20,4 +20,5 @@ COPY --from=builder $GOPATH/github.com/kubemq-hub/kubemq-collector/kubemq-collec
 RUN chown -R 1001:root  /kubemq-collector && chmod g+rwX  /kubemq-collector
 WORKDIR kubemq-collector
 USER 1001
+EXPOSE 8085
 CMD ["./kubemq-collector-run"]

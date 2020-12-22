@@ -1,0 +1,69 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: kubemq-cluster-1
+  labels:
+    app: kubemq-cluster-1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kubemq-cluster-1
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: kubemq-cluster-1
+      annotations:
+        prometheus.io/path: /metrics
+        prometheus.io/port: '8080'
+        prometheus.io/scrape: 'true'
+    spec:
+      containers:
+        - name: kubemq-cluster
+          image: 'docker.io/kubemq/kubemq:latest'
+          ports:
+            - name: grpc-port
+              containerPort: 50000
+              protocol: TCP
+            - name: api-port
+              containerPort: 8080
+              protocol: TCP
+            - name: rest-port
+              containerPort: 9090
+              protocol: TCP
+            - name: cluster-port
+              containerPort: 5228
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: kubemq-cluster-1
+            - configMapRef:
+                name: kubemq-cluster-1
+#          resources:
+#            requests:
+#              cpu: "2"
+#              memory: "12Gi"
+#              ephemeral-storage: "100Gi"
+#          volumeMounts:
+#            - name: vol-ssd
+#              mountPath: './kubemq/store'
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      serviceAccountName: kubemq-cluster
+      serviceAccount: kubemq-cluster
+      securityContext:
+        fsGroup: 200
+      schedulerName: default-scheduler
+  serviceName: kubemq-cluster-1
+#  volumeClaimTemplates:
+#    - metadata:
+#        name: vol-ssd
+#      spec:
+#        accessModes: [ "ReadWriteOnce" ]
+#        storageClassName: ssd
+#        resources:
+#          requests:
+#            storage: "200Gi"
