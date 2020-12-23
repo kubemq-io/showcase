@@ -27,7 +27,9 @@ func NewQueueClient(ctx context.Context, id int, cfg *Config) *QueueClient {
 	}
 	hosts := strings.Split(cfg.Hosts, ",")
 	for _, host := range hosts {
-		go c.runWorker(ctx, host)
+		for i := 0; i < cfg.Concurrency; i++ {
+			go c.runWorker(ctx, host)
+		}
 	}
 	return c
 }

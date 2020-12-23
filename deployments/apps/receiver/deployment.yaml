@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: receiver
-          image: 'docker.io/kubemq/showcase-receiver:v0.1.0'
+          image: 'docker.io/kubemq/showcase-receiver:v0.2.0'
           envFrom:
             - configMapRef:
                 name: receiver

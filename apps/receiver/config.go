@@ -16,6 +16,7 @@ type Config struct {
 	ChannelStartRange int
 	ClientId          string
 	Receivers         int
+	Concurrency       int
 	ReceiveBatch      int
 	ReceiveTimeout    int
 	ReceiveGroup      string
@@ -34,6 +35,7 @@ var (
 	_ = pflag.String("type", "store", "set loader type")
 	_ = pflag.String("clientId", "test-command-client-id", "set clientId")
 	_ = pflag.Int("receivers", 100, "set receivers")
+	_ = pflag.Int("concurrency", 1, "set receivers concurrency")
 	_ = pflag.Int("channel-start-range", 0, "set channel start range")
 	_ = pflag.Int("receiveBatch", 1, "set sendBatch")
 	_ = pflag.Int("receiveTimeout", 60, "set receive timeout")
@@ -56,6 +58,7 @@ func LoadConfig() (*Config, error) {
 	viper.BindEnv("ClientId", "CLIENT_ID")
 	viper.BindEnv("ChannelStartRange", "CHANNEL-START-RANGE")
 	viper.BindEnv("Receivers", "RECEIVERS")
+	viper.BindEnv("Concurrency", "CONCURRENCY")
 	viper.BindEnv("ReceiveBatch", "RECEIVE_BATCH")
 	viper.BindEnv("ReceiveTimeout", "RECEIVE_TIMEOUT")
 	viper.BindEnv("ReceiveGroup", "RECEIVE_GROUP")
@@ -73,6 +76,7 @@ func LoadConfig() (*Config, error) {
 	viper.BindPFlag("ChannelStartRange", pflag.CommandLine.Lookup("channel-start-range"))
 	viper.BindPFlag("ClientId", pflag.CommandLine.Lookup("clientId"))
 	viper.BindPFlag("Receivers", pflag.CommandLine.Lookup("receivers"))
+	viper.BindPFlag("Concurrency", pflag.CommandLine.Lookup("concurrency"))
 	viper.BindPFlag("ReceiveBatch", pflag.CommandLine.Lookup("receiveBatch"))
 	viper.BindPFlag("ReceiveTimeout", pflag.CommandLine.Lookup("receiveTimeout"))
 	viper.BindPFlag("ReceiveGroup", pflag.CommandLine.Lookup("receiveGroup"))
@@ -99,6 +103,7 @@ func (c *Config) Print() {
 	log.Println("Channel Start Range->", c.ChannelStartRange)
 	log.Println("ClientId->", c.ClientId)
 	log.Println("Receivers->", c.Receivers)
+	log.Println("Concurrency->", c.Concurrency)
 	log.Println("ReceiveBatch->", c.ReceiveBatch)
 	log.Println("ReceiveTimout->", c.ReceiveTimeout)
 	log.Println("ReceiveGroup->", c.ReceiveGroup)
@@ -107,4 +112,5 @@ func (c *Config) Print() {
 	log.Println("CollectEvery->", c.CollectEvery)
 	log.Println("Verbose->", c.Verbose)
 	log.Println("CollectorUrl->", c.CollectorUrl)
+
 }

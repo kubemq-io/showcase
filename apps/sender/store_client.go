@@ -106,7 +106,6 @@ func (c *StoreClient) runWorker(ctx context.Context, address string) {
 						case <-ctx.Done():
 							return
 						default:
-							c.stats.Errors.Inc()
 							c.totalMessagesLeft.Inc()
 						}
 					}
