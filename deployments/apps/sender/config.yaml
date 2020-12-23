@@ -21,4 +21,7 @@ data:
   PAYLOAD_File: ''
   COLLECT_EVERY: '5'
   VERBOSE: 'false'
+  DURATION: "1h"
+  TOTAL_MESSAGES: "0"
+  CONCURRENCY: "1"
   COLLECTOR-URL: 'http://collector.apps:8085'

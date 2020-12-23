@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/kubemq-io/kubemq-go"
 	"github.com/nats-io/nuid"
+	"go.uber.org/atomic"
 	"log"
 	"strconv"
 	"strings"
@@ -12,28 +13,39 @@ import (
 )
 
 type QueueClient struct {
-	Id            int
-	cfg           *Config
-	stats         *ClientStats
-	localClientID string
-	localChannel  string
-	payload       []byte
-	sendChannel   chan []*kubemq.QueueMessage
+	Id                int
+	cfg               *Config
+	stats             *ClientStats
+	localClientID     string
+	localChannel      string
+	payload           []byte
+	totalMessagesLeft *atomic.Int64
+	sendChannel       chan []*kubemq.QueueMessage
 }
 
 func NewQueueClient(ctx context.Context, id int, cfg *Config, payload []byte) *QueueClient {
+	totalMessages := cfg.TotalMessages
+	if totalMessages == 0 {
+		totalSeconds := cfg.Duration.Round(time.Second).Seconds()
+		mps := 1e3 / cfg.SendInterval * cfg.SendBatch
+		totalMessages = int64(totalSeconds * float64(mps))
+	}
+
 	c := &QueueClient{
-		Id:            id,
-		cfg:           cfg,
-		stats:         NewClientStats(),
-		localClientID: fmt.Sprintf("%s-%d", cfg.ClientId, id),
-		localChannel:  fmt.Sprintf("%s.%d", cfg.Channel, id),
-		sendChannel:   make(chan []*kubemq.QueueMessage, 60),
-		payload:       payload,
+		Id:                id,
+		cfg:               cfg,
+		stats:             NewClientStats(),
+		localClientID:     fmt.Sprintf("%s-%d", cfg.ClientId, id),
+		localChannel:      fmt.Sprintf("%s.%d", cfg.Channel, id),
+		sendChannel:       make(chan []*kubemq.QueueMessage, 60),
+		payload:           payload,
+		totalMessagesLeft: atomic.NewInt64(totalMessages),
 	}
 	hosts := strings.Split(cfg.Hosts, ",")
 	for _, host := range hosts {
-		go c.runWorker(ctx, host)
+		for i := 0; i < cfg.Concurrency; i++ {
+			go c.runWorker(ctx, host)
+		}
 	}
 	go c.runGenerator(ctx)
 	return c
@@ -77,18 +89,21 @@ func (c *QueueClient) runWorker(ctx context.Context, address string) {
 			results, err := batch.Send(ctx)
 			if err != nil {
 				c.stats.Errors.Add(int64(len(messages)))
+				c.totalMessagesLeft.Add(int64(len(messages)))
 				c.Logf("error sending queue messages, %s", err.Error())
 			} else {
 				for _, result := range results {
 					if result.IsError {
+						c.Logf("error sending queue messages, %s", result.Error)
 						c.stats.Errors.Inc()
+						c.totalMessagesLeft.Inc()
 					} else {
 						c.stats.Messages.Inc()
 						c.stats.Volume.Add(int64(len(c.payload)))
 					}
 				}
 			}
-
+			c.stats.Pending.Store(c.totalMessagesLeft.Load())
 		case <-ctx.Done():
 			return
 		}
@@ -98,16 +113,24 @@ func (c *QueueClient) runWorker(ctx context.Context, address string) {
 func (c *QueueClient) runGenerator(ctx context.Context) {
 	for {
 		select {
-		case <-time.After(time.Duration(c.cfg.SendInterval) * time.Second):
-			var messages []*kubemq.QueueMessage
-			for j := 0; j < c.cfg.SendBatch; j++ {
-				messages = append(messages,
-					kubemq.NewQueueMessage().
-						SetId(nuid.Next()).
-						SetChannel(c.localChannel).
-						SetBody(c.payload))
+		case <-time.After(time.Duration(c.cfg.SendInterval) * time.Millisecond):
+			left := c.totalMessagesLeft.Load()
+			if left > 0 {
+				wanted := c.cfg.SendBatch
+				if left < int64(wanted) {
+					wanted = int(left)
+				}
+				var queueMessages []*kubemq.QueueMessage
+				for j := 0; j < wanted; j++ {
+					queueMessages = append(queueMessages,
+						kubemq.NewQueueMessage().
+							SetId(nuid.Next()).
+							SetChannel(c.localChannel).
+							SetBody(c.payload))
+				}
+				c.totalMessagesLeft.Sub(int64(wanted))
+				c.sendChannel <- queueMessages
 			}
-			c.sendChannel <- messages
 		case <-ctx.Done():
 			return
 		}

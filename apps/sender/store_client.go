@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/kubemq-io/kubemq-go"
 	"github.com/nats-io/nuid"
+	"go.uber.org/atomic"
 	"log"
 	"strconv"
 	"strings"
@@ -13,28 +14,38 @@ import (
 )
 
 type StoreClient struct {
-	Id            int
-	cfg           *Config
-	stats         *ClientStats
-	localClientID string
-	localChannel  string
-	payload       []byte
-	sendChannel   chan []*kubemq.EventStore
+	Id                int
+	cfg               *Config
+	stats             *ClientStats
+	localClientID     string
+	localChannel      string
+	payload           []byte
+	totalMessagesLeft *atomic.Int64
+	sendChannel       chan []*kubemq.EventStore
 }
 
 func NewStoreClient(ctx context.Context, id int, cfg *Config, payload []byte) *StoreClient {
+	totalMessages := cfg.TotalMessages
+	if totalMessages == 0 {
+		totalSeconds := cfg.Duration.Round(time.Second).Seconds()
+		mps := 1e3 / cfg.SendInterval * cfg.SendBatch
+		totalMessages = int64(totalSeconds * float64(mps))
+	}
 	c := &StoreClient{
-		Id:            id,
-		cfg:           cfg,
-		stats:         NewClientStats(),
-		localClientID: fmt.Sprintf("%s-%d", cfg.ClientId, id),
-		localChannel:  fmt.Sprintf("%s.%d", cfg.Channel, id),
-		sendChannel:   make(chan []*kubemq.EventStore, 60),
-		payload:       payload,
+		Id:                id,
+		cfg:               cfg,
+		stats:             NewClientStats(),
+		localClientID:     fmt.Sprintf("%s-%d", cfg.ClientId, id),
+		localChannel:      fmt.Sprintf("%s.%d", cfg.Channel, id),
+		sendChannel:       make(chan []*kubemq.EventStore, 60),
+		payload:           payload,
+		totalMessagesLeft: atomic.NewInt64(totalMessages),
 	}
 	hosts := strings.Split(cfg.Hosts, ",")
 	for _, host := range hosts {
-		go c.runWorker(ctx, host)
+		for i := 0; i < cfg.Concurrency; i++ {
+			go c.runWorker(ctx, host)
+		}
 	}
 	go c.runGenerator(ctx)
 
@@ -96,6 +107,7 @@ func (c *StoreClient) runWorker(ctx context.Context, address string) {
 							return
 						default:
 							c.stats.Errors.Inc()
+							c.totalMessagesLeft.Inc()
 						}
 					}
 				case <-quitCh:
@@ -106,6 +118,7 @@ func (c *StoreClient) runWorker(ctx context.Context, address string) {
 			}
 		}()
 		for {
+
 			select {
 			case result := <-receiveCh:
 				if result.Sent {
@@ -113,7 +126,9 @@ func (c *StoreClient) runWorker(ctx context.Context, address string) {
 				} else {
 					c.Log(result.Err.Error())
 					c.stats.Errors.Inc()
+					c.totalMessagesLeft.Inc()
 				}
+				c.stats.Pending.Store(c.totalMessagesLeft.Load())
 			case err := <-errCh:
 				c.Logf("sender: %d, error: %s", c.Id, err.Error())
 				isStreamUp = false
@@ -131,16 +146,24 @@ func (c *StoreClient) runWorker(ctx context.Context, address string) {
 func (c *StoreClient) runGenerator(ctx context.Context) {
 	for {
 		select {
-		case <-time.After(time.Duration(c.cfg.SendInterval) * time.Second):
-			var events []*kubemq.EventStore
-			for j := 0; j < c.cfg.SendBatch; j++ {
-				events = append(events,
-					kubemq.NewEventStore().
-						SetId(nuid.Next()).
-						SetChannel(c.localChannel).
-						SetBody(c.payload))
+		case <-time.After(time.Duration(c.cfg.SendInterval) * time.Millisecond):
+			left := c.totalMessagesLeft.Load()
+			if left > 0 {
+				wanted := c.cfg.SendBatch
+				if left < int64(wanted) {
+					wanted = int(left)
+				}
+				var events []*kubemq.EventStore
+				for j := 0; j < wanted; j++ {
+					events = append(events,
+						kubemq.NewEventStore().
+							SetId(nuid.Next()).
+							SetChannel(c.localChannel).
+							SetBody(c.payload))
+				}
+				c.totalMessagesLeft.Sub(int64(wanted))
+				c.sendChannel <- events
 			}
-			c.sendChannel <- events
 		case <-ctx.Done():
 			return
 		}

@@ -16,6 +16,7 @@ type ClientStats struct {
 	Messages *atomic.Int64
 	Volume   *atomic.Int64
 	Errors   *atomic.Int64
+	Pending  *atomic.Int64
 }
 
 func NewClientStats() *ClientStats {
@@ -23,6 +24,7 @@ func NewClientStats() *ClientStats {
 		Messages: atomic.NewInt64(0),
 		Volume:   atomic.NewInt64(0),
 		Errors:   atomic.NewInt64(0),
+		Pending:  atomic.NewInt64(0),
 	}
 }
 
@@ -35,6 +37,7 @@ type Stats struct {
 	Messages    *atomic.Int64
 	Volume      *atomic.Int64
 	Errors      *atomic.Int64
+	Pending     *atomic.Int64
 	lastSend    int64
 	lastReceive int64
 	startAt     time.Time
@@ -53,6 +56,7 @@ func CreateStats(cfg *Config) *Stats {
 		Messages:    atomic.NewInt64(0),
 		Volume:      atomic.NewInt64(0),
 		Errors:      atomic.NewInt64(0),
+		Pending:     atomic.NewInt64(0),
 		lastSend:    0,
 		lastReceive: 0,
 		startAt:     time.Now(),
@@ -65,17 +69,20 @@ func CreateStats(cfg *Config) *Stats {
 			Messages: 0,
 			Volume:   0,
 			Errors:   0,
+			Pending:  0,
 		},
 	}
 	return s
 }
 
 func (s *Stats) CollectStats(clients []StatsInterface) *Stats {
+	s.Pending.Store(0)
 	for _, client := range clients {
 		stats := client.GetClientStats()
 		s.Messages.Add(stats.Messages.Swap(0))
 		s.Volume.Add(stats.Volume.Swap(0))
 		s.Errors.Add(stats.Errors.Swap(0))
+		s.Pending.Add(stats.Pending.Load())
 	}
 	return s
 }
@@ -88,6 +95,7 @@ func (s *Stats) ReportStats() *Stats {
 		Messages: s.Messages.Load(),
 		Volume:   s.Volume.Load(),
 		Errors:   s.Errors.Load(),
+		Pending:  s.Pending.Load(),
 	}
 	reportMetric := &Metric{
 		Source:   s.Source,
@@ -97,6 +105,7 @@ func (s *Stats) ReportStats() *Stats {
 		Messages: currentMetric.Messages - s.lastMetric.Messages,
 		Volume:   currentMetric.Volume - s.lastMetric.Volume,
 		Errors:   currentMetric.Errors - s.lastMetric.Errors,
+		Pending:  currentMetric.Pending,
 	}
 	resp, err := s.restyClient.R().SetBody(reportMetric).Post(fmt.Sprintf("%s/report", s.cfg.CollectorUrl))
 	if err != nil {
@@ -120,14 +129,16 @@ func (s *Stats) Print() {
 			"Duration: %s, "+
 			"Messages: %d, "+
 			"Volume: %s, "+
-			"Errors: %d ",
+			"Errors: %d "+
+			"Pending: %d ",
 		s.Source,
 		s.Group,
 		s.Instance,
 		time.Since(s.startAt).Round(time.Second),
 		s.Messages.Load(),
 		ByteCount(s.Volume.Load()),
-		s.Errors.Load()))
+		s.Errors.Load(),
+		s.Pending.Load()))
 }
 
 type Metric struct {
@@ -138,6 +149,7 @@ type Metric struct {
 	Messages int64  `json:"messages"`
 	Volume   int64  `json:"volume"`
 	Errors   int64  `json:"errors"`
+	Pending  int64  `json:"pending"`
 }
 
 func ByteCount(b int64) string {
