@@ -19,6 +19,8 @@ type Aggregator struct {
 	Messages     *atomic.Int64
 	Volume       *atomic.Int64
 	Errors       *atomic.Int64
+	Pending      *atomic.Int64
+	PendingMap   map[string]*int64
 }
 
 func NewAggregator(source, group string) *Aggregator {
@@ -37,6 +39,7 @@ func NewAggregator(source, group string) *Aggregator {
 				Messages:  0,
 				Volume:    0,
 				Errors:    0,
+				Pending:   0,
 			},
 			End: &State{
 				Time:      time.Now().UTC(),
@@ -45,6 +48,7 @@ func NewAggregator(source, group string) *Aggregator {
 				Messages:  0,
 				Volume:    0,
 				Errors:    0,
+				Pending:   0,
 			},
 			Changed: &Delta{
 				Duration:  0,
@@ -60,6 +64,8 @@ func NewAggregator(source, group string) *Aggregator {
 		Messages:   atomic.NewInt64(0),
 		Volume:     atomic.NewInt64(0),
 		Errors:     atomic.NewInt64(0),
+		Pending:    atomic.NewInt64(0),
+		PendingMap: map[string]*int64{},
 	}
 }
 
@@ -68,6 +74,18 @@ func (a *Aggregator) Add(m *Metric) {
 	_, ok := a.Instances[m.Instance]
 	if !ok {
 		a.Instances[m.Instance] = m.Clients
+	}
+	p, ok2 := a.PendingMap[m.Instance]
+	if !ok2 {
+		p := new(int64)
+		*p = m.Pending
+		a.PendingMap[m.Instance] = p
+	} else {
+		*p = m.Pending
+	}
+	a.Pending.Store(0)
+	for _, p := range a.PendingMap {
+		a.Pending.Add(*p)
 	}
 	a.Unlock()
 	a.Volume.Add(m.Volume)
@@ -79,10 +97,12 @@ func (a *Aggregator) Add(m *Metric) {
 func (a *Aggregator) Clear() {
 	a.Lock()
 	a.Instances = map[string]int{}
+	a.PendingMap = map[string]*int64{}
 	a.Unlock()
 	a.Volume.Store(0)
 	a.Messages.Store(0)
 	a.Errors.Store(0)
+	a.Pending.Store(0)
 	a.logger.Info("aggregator cleared")
 }
 
@@ -103,6 +123,7 @@ func (a *Aggregator) Snapshot() *Snapshot {
 			Messages:  a.LastSnapshot.End.Messages,
 			Volume:    a.LastSnapshot.End.Volume,
 			Errors:    a.LastSnapshot.End.Errors,
+			Pending:   a.LastSnapshot.End.Pending,
 		},
 		End: &State{
 			Time:      time.Now().UTC(),
@@ -111,6 +132,7 @@ func (a *Aggregator) Snapshot() *Snapshot {
 			Messages:  a.Messages.Load(),
 			Volume:    a.Volume.Load(),
 			Errors:    a.Errors.Load(),
+			Pending:   a.Pending.Load(),
 		},
 	}
 	s.SetDelta()

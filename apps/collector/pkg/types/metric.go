@@ -8,4 +8,5 @@ type Metric struct {
 	Messages int64  `json:"messages"`
 	Volume   int64  `json:"volume"`
 	Errors   int64  `json:"errors"`
+	Pending  int64  `json:"pending"`
 }

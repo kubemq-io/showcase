@@ -13,6 +13,7 @@ type State struct {
 	Messages  int64     `json:"messages"`
 	Volume    int64     `json:"volume"`
 	Errors    int64     `json:"errors"`
+	Pending   int64     `json:"pending"`
 }
 type Delta struct {
 	Duration  float64 `json:"duration"`
@@ -21,6 +22,7 @@ type Delta struct {
 	Messages  int64   `json:"messages"`
 	Volume    int64   `json:"volume"`
 	Errors    int64   `json:"errors"`
+	Pending   int64   `json:"pending"`
 }
 type Snapshot struct {
 	Source  string `json:"source"`
@@ -32,7 +34,7 @@ type Snapshot struct {
 
 func (s *Snapshot) String() string {
 	return fmt.Sprintf(
-		"Source: %s, Group: %s, Instances: %d, Clients: %d, Messages: %d, Volume: %s, Errors: %d",
+		"Source: %s, Group: %s, Instances: %d, Clients: %d, Messages: %d, Volume: %s, Errors: %d, Pending: %d",
 		s.Source,
 		s.Group,
 		s.End.Instances,
@@ -40,6 +42,7 @@ func (s *Snapshot) String() string {
 		s.End.Messages,
 		utils.ByteCount(s.End.Volume),
 		s.End.Errors,
+		s.End.Pending,
 	)
 }
 func (s *Snapshot) SetDelta() {
@@ -50,5 +53,6 @@ func (s *Snapshot) SetDelta() {
 		Messages:  s.End.Messages - s.Start.Messages,
 		Volume:    s.End.Volume - s.Start.Volume,
 		Errors:    s.End.Errors - s.Start.Errors,
+		Pending:   s.End.Pending - s.Start.Pending,
 	}
 }
