@@ -3,7 +3,7 @@ apiVersion: apps/v1
 metadata:
   name: sender
 spec:
-  replicas: 1
+  replicas: 10
   selector:
     matchLabels:
       app: sender

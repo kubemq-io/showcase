@@ -3,9 +3,16 @@ version: '3'
 tasks:
   default:
     cmds:
+      - task: deploy
+  deploy:
+    cmds:
       - kubectl apply -f ./deployment.yaml -n apps
       - kubectl apply -f ./config.yaml -n apps
   delete:
     cmds:
       - kubectl delete -f ./deployment.yaml -n apps
       - kubectl delete -f ./config.yaml -n apps
+  reload:
+    cmds:
+      - task: delete
+      - task: deploy

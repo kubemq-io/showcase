@@ -1,0 +1,106 @@
+configData: ""
+key: ""
+standalone: true
+replicas: 3
+volume:
+  size: ""
+  storageClass: ""
+license: |-
+  -----BEGIN KUBEMQ KEY-----
+  eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJMYWJlbHMiOnsiYmlsbGluZy1
+  yZXBvcnQtZW5kcG9pbnQiOiJodHRwczovL2JpbGxpbmcua3ViZW1xLmlvL3JlcG9
+  ydCIsImJpbGxpbmctcmVwb3J0LWludGVydmFsLXNlY29uZHMiOiIzMDAiLCJsaWN
+  lbnNlLWV4cGlyYXRpb24iOiIyMDIxLTEyLTEwVDE0OjMwOjE2WiIsImxpY2Vuc2U
+  tZm9yY2Utc2h1dGRvd24iOiJmYWxzZSIsImxpY2Vuc2UtbWF4LWluc3RhbmNlcyI
+  6IjIxIiwibGljZW5zZS10eXBlIjoiS3ViZU1RIFZvbHVtZSBMaWNlbnNlIn0sImF
+  1ZCI6IkNvcnRldmEiLCJleHAiOjE2NDY5MjI2MTYsImp0aSI6IjQyNjUxMTE2LTE
+  5NTUtNGFiNi1iMmRmLTcwNWYzYWY2Nzk5ZCIsImlhdCI6MTYwNzYxMDYxNiwiaXN
+  zIjoiS3ViZU1RIiwic3ViIjoiS3ViZU1RIExpY2Vuc2UifQ.Rnk9xvi8EfNNiY_u
+  kcSc7l7QDQvkVNZ1VINTdnPDVf9cpRutgvqPU3ieQlDPLHQqnO4y6VxnJhkiQYa2
+  gHp_pp7iAnM5UOd8m-Wntt4Q1tFt1ZStK5Jx9DrwTl-zGF81ild5Rwm5BvrDNqRN
+  4fSO2PhkDMgeum9f6fQfURATCZaHTWzc16xbuRFrbvJNA2omxOTQKkv_KTQUHHLQ
+  DLDpVbPmmx-NY9Mly2owbuvV8zXLgPSFQJT0i5cxGQSDGhJnRFcYnb7RHcrpTUWO
+  og19pHgTnRtdlr9mrZ3z_LsMjFY-tMEr59Fd9JfrEPpGpXXwERknhHdAoUMQpa0N
+  r9W-Og
+  -----END KUBEMQ KEY-----
+image:
+  image: "docker.io/kubemq/kubemq:dev-v2.2.0.0"
+  pullPolicy: Always
+api:
+  disabled: false
+  port: 8080
+  expose: ClusterIP
+  nodePort: 0
+grpc:
+  disabled: false
+  port: 50000
+  expose: ClusterIP
+  nodePort: 0
+  bodyLimit: 0
+  bufferSize: 0
+rest:
+  disabled: false
+  port: 9090
+  expose: ClusterIP
+  nodePort: 0
+  bodyLimit: 0
+  bufferSize: 0
+tls:
+  cert: ""
+  key: ""
+  ca: ""
+#resources:
+#  enable: false
+#  limits:
+#    cpu: 0
+#    memory: 9
+#  requests:
+#    cpu: 2
+#    memory: 6Gi
+#nodeSelectors:
+#  keys:
+#    "node-type": "kubemq"
+authentication:
+  key: ""
+  type: ""
+authorization:
+  policyData: ""
+  url: ""
+  autoReload: 0
+health:
+  enabled: false
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 10
+  failureThreshold: 12
+  successThreshold: 1
+routing:
+  data: ""
+  url: ""
+  autoReload: 0
+log:
+  level: 2
+  file: ""
+notification:
+  enabled: false
+  prefix: ""
+  log: false
+store:
+  clean: false
+  path: "./store"
+  maxChannels: 0
+  maxSubscribers: 0
+  maxMessages: 0
+  maxChannelSize: 0
+  messagesRetentionMinutes: 1440
+  purgeInactiveMinutes: 1440
+queue:
+  maxReceiveMessagesRequest: 1024
+  maxWaitTimeoutSeconds: 3600
+  maxExpirationSeconds: 43200
+  maxDelaySeconds: 43200
+  maxReQueues: 1024
+  maxVisibilitySeconds: 43200
+  defaultVisibilitySeconds: 60
+  defaultWaitTimeoutSeconds: 1
+statefulsetConfigData: ""

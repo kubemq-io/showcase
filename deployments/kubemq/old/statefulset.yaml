@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: kubemq-cluster
-          image: 'docker.io/kubemq/kubemq:latest'
+          image: 'docker.io/kubemq/kubemq:dev-v2.2.0.0'
           ports:
             - name: grpc-port
               containerPort: 50000
@@ -40,11 +40,15 @@ spec:
                 name: kubemq-cluster-1
             - configMapRef:
                 name: kubemq-cluster-1
-#          resources:
-#            requests:
-#              cpu: "2"
-#              memory: "12Gi"
-#              ephemeral-storage: "100Gi"
+          resources:
+            limits:
+              cpu: "0"
+              memory: "0"
+              ephemeral-storage: "200Gi"
+            requests:
+              cpu: "0"
+              memory: "0"
+#              ephemeral-storage: "0"
 #          volumeMounts:
 #            - name: vol-ssd
 #              mountPath: './kubemq/store'

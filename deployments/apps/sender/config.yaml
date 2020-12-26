@@ -7,21 +7,21 @@ metadata:
 data:
   SOURCE: 'sender'
   GROUP: 'senders'
-  HOSTS: 'kubemq-cluster-1-grpc-internal.kubemq:50000'
-  CHANNEL: 'q1'
+  HOSTS: 'kubemq-cluster-grpc-headless.kubemq:50000'
+  CHANNEL: ''
   TYPE: 'queue'
   CLIENT_ID: ''
   CHANNEL-START-RANGE: '0'
-  SENDERS: '100'
+  SENDERS: '500'
   SEND_BATCH: '15'
-  SEND_INTERVAL: '1'
+  SEND_INTERVAL: '1000'
   LOAD_INTERVAL: '100'
   KILL_AFTER: '0'
   PAYLOAD_SIZE: '5000'
   PAYLOAD_File: ''
   COLLECT_EVERY: '5'
   VERBOSE: 'false'
-  DURATION: "1h"
-  TOTAL_MESSAGES: "0"
+  DURATION: ""
+  TOTAL_MESSAGES: "75000"
   CONCURRENCY: "1"
   COLLECTOR-URL: 'http://collector.apps:8085'

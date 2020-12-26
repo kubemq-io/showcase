@@ -3,17 +3,31 @@ version: '3'
 tasks:
   init:
     cmds:
-      - kubectl apply -f ./init.yaml
+      - kubectl apply -f ./namespace.yaml
+      - helm repo add kubemq-charts  https://kubemq-io.github.io/charts
+      - helm repo update
+      - helm install kubemq-operator kubemq-charts/operator -n kubemq
   deploy:
     cmds:
-      - kubectl apply -f ./statefulset.yaml -n kubemq
-      - kubectl apply -f ./config.yaml -n kubemq
-      - kubectl apply -f ./service.yaml -n kubemq
-      - kubectl apply -f ./secret.yaml -n kubemq
+      - helm install kubemq-cluster kubemq-charts/kubemq --values ./values.yaml -n kubemq
+
+  upgrade:
+    cmds:
+      - helm upgrade kubemq-cluster kubemq-charts/kubemq --values ./values.yaml -n kubemq
+
   delete:
     cmds:
-      - kubectl delete -f ./statefulset.yaml -n kubemq
-      - kubectl delete -f ./config.yaml -n kubemq
-      - kubectl delete -f ./service.yaml -n kubemq
-      - kubectl delete -f ./secret.yaml -n kubemq
+      - helm delete kubemq-cluster -n kubemq
 
+  old_deploy:
+    cmds:
+      - kubectl apply -f ./old/statefulset.yaml -n kubemq
+      - kubectl apply -f ./old/config.yaml -n kubemq
+      - kubectl apply -f ./old/service.yaml -n kubemq
+      - kubectl apply -f ./old/secret.yaml -n kubemq
+  old_delete:
+    cmds:
+      - kubectl delete -f ./old/statefulset.yaml -n kubemq
+      - kubectl delete -f ./old/config.yaml -n kubemq
+      - kubectl delete -f ./old/service.yaml -n kubemq
+      - kubectl delete -f ./old/secret.yaml -n kubemq

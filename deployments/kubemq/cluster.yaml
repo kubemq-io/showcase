@@ -1,0 +1,48 @@
+apiVersion: core.k8s.kubemq.io/v1alpha1
+kind: KubemqCluster
+metadata:
+  name: kubemq-cluster
+  namespace: kubemq
+spec:
+  image:
+    image: "docker.io/kubemq/kubemq:dev-v2.2.0.0"
+  configData: |-
+    broker:
+      diskSyncSeconds: 300
+  license: |-
+    -----BEGIN KUBEMQ KEY-----
+    eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJMYWJlbHMiOnsiYmlsbGluZy1
+    yZXBvcnQtZW5kcG9pbnQiOiJodHRwczovL2JpbGxpbmcua3ViZW1xLmlvL3JlcG9
+    ydCIsImJpbGxpbmctcmVwb3J0LWludGVydmFsLXNlY29uZHMiOiIzMDAiLCJsaWN
+    lbnNlLWV4cGlyYXRpb24iOiIyMDIxLTEyLTEwVDE0OjMwOjE2WiIsImxpY2Vuc2U
+    tZm9yY2Utc2h1dGRvd24iOiJmYWxzZSIsImxpY2Vuc2UtbWF4LWluc3RhbmNlcyI
+    6IjIxIiwibGljZW5zZS10eXBlIjoiS3ViZU1RIFZvbHVtZSBMaWNlbnNlIn0sImF
+    1ZCI6IkNvcnRldmEiLCJleHAiOjE2NDY5MjI2MTYsImp0aSI6IjQyNjUxMTE2LTE
+    5NTUtNGFiNi1iMmRmLTcwNWYzYWY2Nzk5ZCIsImlhdCI6MTYwNzYxMDYxNiwiaXN
+    zIjoiS3ViZU1RIiwic3ViIjoiS3ViZU1RIExpY2Vuc2UifQ.Rnk9xvi8EfNNiY_u
+    kcSc7l7QDQvkVNZ1VINTdnPDVf9cpRutgvqPU3ieQlDPLHQqnO4y6VxnJhkiQYa2
+    gHp_pp7iAnM5UOd8m-Wntt4Q1tFt1ZStK5Jx9DrwTl-zGF81ild5Rwm5BvrDNqRN
+    4fSO2PhkDMgeum9f6fQfURATCZaHTWzc16xbuRFrbvJNA2omxOTQKkv_KTQUHHLQ
+    DLDpVbPmmx-NY9Mly2owbuvV8zXLgPSFQJT0i5cxGQSDGhJnRFcYnb7RHcrpTUWO
+    og19pHgTnRtdlr9mrZ3z_LsMjFY-tMEr59Fd9JfrEPpGpXXwERknhHdAoUMQpa0N
+    r9W-Og
+    -----END KUBEMQ KEY-----
+  replicas: 3
+  standalone: true
+  resources:
+    limitsCpu: ""
+    limitsMemory: ""
+    limitsEphemeralStorage: "100Gi"
+#  statefulsetConfigData: ""
+  authentication:
+    key: |-
+      -----BEGIN PUBLIC KEY-----
+      MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAt2GVE6vIMKlUsJeIQrSX
+      tPG7X+06/qfyfQUjYJYvn1Pff05B3LcazECYEMd/act5YlnzrMg6hlbcoa9szr3/
+      mpwjJ+l4RKd6J1uZngPaGaRSAr4DvSYsMe9pRrrOnW9XyRBLiB+EOriq5qkcSTnR
+      cwwoczPekJOK45rEUgdaL5JP/TRhYYwgayb+zQ5cu+1Hx94m5XldrAzkeQ8ldMeW
+      BPzfasnX6zaBXtdWksJqmpMMWg1NunH3+NWFyLsPt4BNbtjpKOp7Wq3jDQpp803P
+      sK3/XksM/87qPL4xNCJuV8MF4Pbx8JE3ZRusK6usmJrohv8+vgIIg4oKdpMjDlrz
+      pQIDAQAB
+      -----END PUBLIC KEY-----
+    type: RS512
