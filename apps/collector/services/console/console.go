@@ -19,7 +19,7 @@ func NewConsole(ctx context.Context, collector *collector.Collector) *Console {
 	return c
 }
 func (c *Console) print() {
-	for _, snapshot := range c.collector.Top() {
+	for _, snapshot := range c.collector.Top("") {
 		log.Println(snapshot.String())
 	}
 }

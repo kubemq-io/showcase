@@ -48,7 +48,7 @@ func Start(ctx context.Context, collector *collector.Collector, port int) (*Serv
 
 	})
 	s.echoWebServer.GET("/top", func(c echo.Context) error {
-		return c.JSONPretty(200, s.collector.Top(), "\t")
+		return c.JSONPretty(200, s.collector.Top(c.QueryParam("group")), "\t")
 
 	})
 	s.echoWebServer.GET("/bucket", func(c echo.Context) error {

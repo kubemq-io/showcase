@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/kubemq-io/showcase/apps/collector/config"
 	"github.com/kubemq-io/showcase/apps/collector/pkg/logger"
 	"github.com/kubemq-io/showcase/apps/collector/services/api"
 	"github.com/kubemq-io/showcase/apps/collector/services/collector"
@@ -24,7 +25,11 @@ func run() error {
 	if err != nil {
 		return err
 	}
-
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	cfg.Print()
 	apiServer, err := api.Start(ctx, col, 8085)
 	if err != nil {
 		return err

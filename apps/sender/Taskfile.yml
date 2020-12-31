@@ -29,6 +29,9 @@ tasks:
   push:
     cmds:
       - docker push kubemq/{{.BINARY_NAME}}:{{.VERSION}}
+  send:
+    cmds:
+      - sender --senders 100 --type queue --payloadSize 5000 --sendInterval 100 --sendBatch 100 --channel q1 --totalMessages 50000
   release:
      cmds:
       - task: build

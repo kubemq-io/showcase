@@ -60,11 +60,17 @@ func (c *Collector) ClearAll() {
 		return true
 	})
 }
-func (c *Collector) Top() []*types.Snapshot {
+func (c *Collector) Top(group string) []*types.Snapshot {
 	var list []*types.Snapshot
 	c.Buckets.Range(func(key, value interface{}) bool {
-		bucket := value.(*types.Bucket)
-		list = append(list, bucket.Top())
+		groupVal, bucket := key.(string), value.(*types.Bucket)
+		if group != "" {
+			if group == groupVal {
+				list = append(list, bucket.Top())
+			}
+		} else {
+			list = append(list, bucket.Top())
+		}
 		return true
 	})
 	return list
