@@ -18,7 +18,6 @@ func LoadConfig() (*Config, error) {
 	pflag.Parse()
 	cfg := &Config{}
 	viper.BindEnv("KubeMQHosts", "KUBEMQ_HOSTS")
-
 	viper.BindPFlag("KubeMQHosts", pflag.CommandLine.Lookup("kubemq-hosts"))
 	err := viper.Unmarshal(cfg)
 	if err != nil {

@@ -1,12 +1,15 @@
 package kubemq
 
 type Status struct {
+	Host     string        `json:"host"`
 	System   *System       `json:"system"`
 	Entities EntitiesGroup `json:"entities"`
 }
 
-func NewStatus() *Status {
-	return &Status{}
+func NewStatus(host string) *Status {
+	return &Status{
+		Host: host,
+	}
 }
 func (s *Status) SetSystem(value *System) *Status {
 	s.System = value

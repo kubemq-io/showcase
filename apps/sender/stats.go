@@ -109,11 +109,11 @@ func (s *Stats) ReportStats() *Stats {
 	}
 	resp, err := s.restyClient.R().SetBody(reportMetric).Post(fmt.Sprintf("%s/report", s.cfg.CollectorUrl))
 	if err != nil {
-		log.Println(fmt.Sprintf("error reporting stats, %s", err.Error()))
+	//	log.Println(fmt.Sprintf("error reporting stats, %s", err.Error()))
 		return s
 	}
 	if resp.IsError() {
-		log.Println(fmt.Sprintf("error reporting stats, %s", resp.Status()))
+	//	log.Println(fmt.Sprintf("error reporting stats, %s", resp.Status()))
 	}
 	s.lastMetric = currentMetric
 	return s

@@ -2,8 +2,23 @@ POST http://localhost:8085/report
 Content-Type: application/json
 
 {
-  "source": "sender",
-  "instance": "sender-4",
+  "source": "sender-1",
+  "group": "senders",
+  "instance": "sender-1-1",
+  "clients": 100,
+  "messages": 1000000,
+  "volume": 50030,
+  "errors": 20,
+  "pending": 100000
+}
+###
+POST http://localhost:8085/report
+Content-Type: application/json
+
+{
+  "source": "sender-1",
+  "group": "senders",
+  "instance": "sender-1-2",
   "clients": 100,
   "messages": 100,
   "volume": 50000
@@ -13,8 +28,9 @@ POST http://localhost:8085/report
 Content-Type: application/json
 
 {
-  "source": "sender",
-  "instance": "sender-2",
+  "source": "sender-2",
+  "group": "senders",
+  "instance": "sender-1-1",
   "clients": 100,
   "messages": 100,
   "volume": 50000
@@ -24,10 +40,11 @@ POST http://localhost:8085/report
 Content-Type: application/json
 
 {
-  "source": "sender",
-  "instance": "sender-4",
+  "source": "receiver-1",
+  "group": "receivers",
+  "instance": "receiver-1-1",
   "clients": 100,
   "messages": 100,
-  "volume": 50000
+  "volume": 50000,
+  "errors": 100
 }
-###

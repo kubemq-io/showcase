@@ -3,8 +3,11 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/kubemq-io/showcase/apps/collector/pkg/types"
+	"github.com/kubemq-io/showcase/apps/collector/pkg/types/api"
+	"github.com/kubemq-io/showcase/apps/collector/pkg/types/base"
+	kubemq2 "github.com/kubemq-io/showcase/apps/collector/pkg/types/kubemq"
 	"github.com/kubemq-io/showcase/apps/collector/services/collector"
+	"github.com/kubemq-io/showcase/apps/collector/services/kubemq"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"strconv"
@@ -14,12 +17,14 @@ import (
 type Server struct {
 	echoWebServer *echo.Echo
 	collector     *collector.Collector
+	kubemqService *kubemq.Service
 }
 
-func Start(ctx context.Context, collector *collector.Collector, port int) (*Server, error) {
+func Start(ctx context.Context, collector *collector.Collector, kubemqService *kubemq.Service, port int) (*Server, error) {
 	s := &Server{
 		echoWebServer: echo.New(),
 		collector:     collector,
+		kubemqService: kubemqService,
 	}
 	s.echoWebServer.Use(middleware.Recover())
 	s.echoWebServer.Use(middleware.CORS())
@@ -34,7 +39,7 @@ func Start(ctx context.Context, collector *collector.Collector, port int) (*Serv
 
 	})
 	s.echoWebServer.POST("/report", func(c echo.Context) error {
-		m := &types.Metric{}
+		m := &base.Metric{}
 		err := c.Bind(m)
 		if err != nil {
 			return err
@@ -50,6 +55,28 @@ func Start(ctx context.Context, collector *collector.Collector, port int) (*Serv
 	s.echoWebServer.GET("/top", func(c echo.Context) error {
 		return c.JSONPretty(200, s.collector.Top(c.QueryParam("group")), "\t")
 
+	})
+	s.echoWebServer.GET("/senders", func(c echo.Context) error {
+		data := s.collector.Top("senders")
+		return c.JSONPretty(200, api.GetSenders(data), "\t")
+
+	})
+	s.echoWebServer.GET("/receivers", func(c echo.Context) error {
+		data := s.collector.Top("receivers")
+		return c.JSONPretty(200, api.GetReceivers(data), "\t")
+	})
+	s.echoWebServer.GET("/api/status", func(c echo.Context) error {
+		host := c.QueryParam("host")
+		source := c.QueryParam("source")
+		if source == "" {
+			source = "queues"
+		}
+		res := kubemq2.NewResponse(c)
+		res.SetResponseBody(kubemq.NewFakeStatus(host, source))
+		return res.Send()
+	})
+	s.echoWebServer.GET("/kubemq", func(c echo.Context) error {
+		return c.JSONPretty(200, api.GetKubeMQ(s.kubemqService.Get()), "\t")
 	})
 	s.echoWebServer.GET("/bucket", func(c echo.Context) error {
 		count, _ := strconv.Atoi(c.QueryParam("count"))

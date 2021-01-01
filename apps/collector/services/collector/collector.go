@@ -3,7 +3,7 @@ package collector
 import (
 	"context"
 	"fmt"
-	"github.com/kubemq-io/showcase/apps/collector/pkg/types"
+	"github.com/kubemq-io/showcase/apps/collector/pkg/types/base"
 	"strings"
 	"sync"
 	"time"
@@ -27,31 +27,30 @@ func NewCollector(ctx context.Context) (*Collector, error) {
 	return c, nil
 }
 
-func (c *Collector) Aggregate(m *types.Metric) {
+func (c *Collector) Aggregate(m *base.Metric) {
 	key := fmt.Sprintf("%s/%s", m.Source, m.Group)
 	val, ok := c.Aggregators.Load(key)
 	if ok {
-		agg := val.(*types.Aggregator)
+		agg := val.(*base.Aggregator)
 		agg.Add(m)
 	} else {
-		agg := types.NewAggregator(m.Source, m.Group)
+		agg := base.NewAggregator(m.Source, m.Group)
 		c.Aggregators.Store(key, agg)
 		agg.Add(m)
 	}
-
 }
 func (c *Collector) Clear(source, group string) {
 	key := fmt.Sprintf("%s/%s", source, group)
 	val, ok := c.Aggregators.Load(key)
 	if ok {
-		agg := val.(*types.Aggregator)
+		agg := val.(*base.Aggregator)
 		c.snapshot(group, agg)
 		agg.Clear()
 	}
 }
 func (c *Collector) ClearAll() {
 	c.Aggregators.Range(func(key, value interface{}) bool {
-		val, agg := key.(string), value.(*types.Aggregator)
+		val, agg := key.(string), value.(*base.Aggregator)
 		sourceGroup := strings.Split(val, "/")
 		if len(sourceGroup) == 2 {
 			c.snapshot(sourceGroup[1], agg)
@@ -60,47 +59,45 @@ func (c *Collector) ClearAll() {
 		return true
 	})
 }
-func (c *Collector) Top(group string) []*types.Snapshot {
-	var list []*types.Snapshot
+func (c *Collector) Top(group string) []*base.Snapshot {
+	var list []*base.Snapshot
 	c.Buckets.Range(func(key, value interface{}) bool {
-		groupVal, bucket := key.(string), value.(*types.Bucket)
-		if group != "" {
-			if group == groupVal {
+		val, bucket := key.(string), value.(*base.Bucket)
+		if group == "" {
+			list = append(list, bucket.Top())
+		} else {
+			if strings.Contains(val, "/"+group) {
 				list = append(list, bucket.Top())
 			}
-		} else {
-			list = append(list, bucket.Top())
 		}
+
 		return true
 	})
 	return list
 }
-func (c *Collector) Bucket(name string, count int) []*types.Snapshot {
+func (c *Collector) Bucket(name string, count int) []*base.Snapshot {
 	val, ok := c.Buckets.Load(name)
 	if ok {
-		return val.(*types.Bucket).List(count)
+		return val.(*base.Bucket).List(count)
 	}
 	return nil
 }
 
 func (c *Collector) processSnapshots() {
 	c.Aggregators.Range(func(key, value interface{}) bool {
-		val, agg := key.(string), value.(*types.Aggregator)
-		sourceGroup := strings.Split(val, "/")
-		if len(sourceGroup) == 2 {
-			c.snapshot(sourceGroup[1], agg)
-		}
+		val, agg := key.(string), value.(*base.Aggregator)
+		c.snapshot(val, agg)
 		return true
 	})
 }
 
-func (c *Collector) snapshot(key string, agg *types.Aggregator) {
+func (c *Collector) snapshot(key string, agg *base.Aggregator) {
 	val, ok := c.Buckets.Load(key)
 	if ok {
-		bucket := val.(*types.Bucket)
+		bucket := val.(*base.Bucket)
 		bucket.Append(agg.Snapshot())
 	} else {
-		bucket := types.NewBucket(key)
+		bucket := base.NewBucket(key)
 		c.Buckets.Store(key, bucket)
 		bucket.Append(agg.Snapshot())
 	}

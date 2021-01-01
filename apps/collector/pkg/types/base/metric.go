@@ -1,4 +1,4 @@
-package types
+package base
 
 type Metric struct {
 	Source   string `json:"source"`
