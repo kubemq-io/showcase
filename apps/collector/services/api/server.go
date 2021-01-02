@@ -29,7 +29,7 @@ func Start(ctx context.Context, collector *collector.Collector, kubemqService *k
 	s.echoWebServer.Use(middleware.Recover())
 	s.echoWebServer.Use(middleware.CORS())
 	s.echoWebServer.HideBanner = true
-
+	s.echoWebServer.Static("/dashboard", "./dist")
 	s.echoWebServer.GET("/health", func(c echo.Context) error {
 		return c.String(200, "ok")
 	})

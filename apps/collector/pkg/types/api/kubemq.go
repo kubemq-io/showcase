@@ -1,6 +1,10 @@
 package api
 
-import "github.com/kubemq-io/showcase/apps/collector/pkg/types/kubemq"
+import (
+	"github.com/kubemq-io/showcase/apps/collector/pkg/types/kubemq"
+	"sort"
+	"strings"
+)
 
 type Kubemq struct {
 	TotalIn  []*DataItem   `json:"total_in"`
@@ -84,6 +88,9 @@ func GetKubeMQ(servers map[string]*kubemq.Status) *Kubemq {
 
 	kubemqs.TotalIn = dataItemsMapIn.List()
 	kubemqs.TotalOut = dataItemsMapOut.List()
-
+	sort.Slice(kubemqs.List, func(i, j int) bool {
+		n := strings.Compare(kubemqs.List[i].Title, kubemqs.List[j].Title)
+		return n < 0
+	})
 	return kubemqs
 }

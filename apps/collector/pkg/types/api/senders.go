@@ -2,6 +2,8 @@ package api
 
 import (
 	"github.com/kubemq-io/showcase/apps/collector/pkg/types/base"
+	"sort"
+	"strings"
 )
 
 type Senders struct {
@@ -41,7 +43,10 @@ func GetSenders(data []*base.Snapshot) *Senders {
 	dataItemsMap.m["Volume"] = dataItemsMap.Item("Volume").Bytes()
 	dataItemsMap.m["Pending"] = dataItemsMap.Item("Pending").Number()
 	dataItemsMap.m["Errors"] = dataItemsMap.Item("Errors").Number()
-
+	sort.Slice(senders.List, func(i, j int) bool {
+		n := strings.Compare(senders.List[i].Title, senders.List[j].Title)
+		return n < 0
+	})
 	senders.Total = dataItemsMap.List()
 	return senders
 }

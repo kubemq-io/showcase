@@ -11,7 +11,7 @@ type Config struct {
 }
 
 var (
-	_ = pflag.String("kubemq-hosts", "localhost:5000", "set kubemq hosts status collection")
+	_ = pflag.String("kubemq-hosts", "", "set kubemq hosts status collection")
 )
 
 func LoadConfig() (*Config, error) {

@@ -48,3 +48,29 @@ Content-Type: application/json
   "volume": 50000,
   "errors": 100
 }
+###
+POST http://localhost:8085/report
+Content-Type: application/json
+
+{
+  "source": "receiver-2",
+  "group": "receivers",
+  "instance": "receiver-1-1",
+  "clients": 100,
+  "messages": 1000,
+  "volume": 50000,
+  "errors": 100
+}
+###
+POST http://localhost:8085/report
+Content-Type: application/json
+
+{
+  "source": "receiver-3",
+  "group": "receivers",
+  "instance": "receiver-1-1",
+  "clients": 10000,
+  "messages": 1000,
+  "volume": 50000,
+  "errors": 100
+}

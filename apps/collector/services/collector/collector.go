@@ -49,15 +49,13 @@ func (c *Collector) Clear(source, group string) {
 	}
 }
 func (c *Collector) ClearAll() {
-	c.Aggregators.Range(func(key, value interface{}) bool {
-		val, agg := key.(string), value.(*base.Aggregator)
-		sourceGroup := strings.Split(val, "/")
-		if len(sourceGroup) == 2 {
-			c.snapshot(sourceGroup[1], agg)
-			agg.Clear()
-		}
-		return true
-	})
+	//c.Aggregators.Range(func(key, value interface{}) bool {
+	//	_, agg := key.(string), value.(*base.Aggregator)
+	//	agg.Clear()
+	//	return true
+	//})
+	c.Aggregators = sync.Map{}
+	c.Buckets = sync.Map{}
 }
 func (c *Collector) Top(group string) []*base.Snapshot {
 	var list []*base.Snapshot

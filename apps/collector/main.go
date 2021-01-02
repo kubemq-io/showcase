@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/kubemq-io/showcase/apps/collector/config"
 	"github.com/kubemq-io/showcase/apps/collector/pkg/logger"
 	"github.com/kubemq-io/showcase/apps/collector/services/api"
 	"github.com/kubemq-io/showcase/apps/collector/services/collector"
 	"github.com/kubemq-io/showcase/apps/collector/services/kubemq"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -40,6 +42,17 @@ func run() error {
 	}
 	kubemqService.Start(ctx)
 	//	_ = console.NewConsole(ctx, col)
+	fs := http.FileServer(http.Dir("./dist"))
+	http.Handle("/", fs)
+
+	go func() {
+		fmt.Println("Server listening on port 3000")
+		log.Panic(
+			http.ListenAndServe(":3000", nil),
+		)
+	}()
+	// Start the server.
+
 	<-gracefulShutdown
 	_ = apiServer.Stop()
 	return nil

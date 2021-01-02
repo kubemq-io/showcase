@@ -1,6 +1,10 @@
 package api
 
-import "github.com/kubemq-io/showcase/apps/collector/pkg/types/base"
+import (
+	"github.com/kubemq-io/showcase/apps/collector/pkg/types/base"
+	"sort"
+	"strings"
+)
 
 type Receivers struct {
 	Total []*DataItem   `json:"total"`
@@ -34,6 +38,10 @@ func GetReceivers(data []*base.Snapshot) *Receivers {
 	dataItemsMap.m["Messages"] = dataItemsMap.Item("Messages").Number()
 	dataItemsMap.m["Volume"] = dataItemsMap.Item("Volume").Bytes()
 	dataItemsMap.m["Errors"] = dataItemsMap.Item("Errors").Number()
+	sort.Slice(receivers.List, func(i, j int) bool {
+		n := strings.Compare(receivers.List[i].Title, receivers.List[j].Title)
+		return n < 0
+	})
 	receivers.Total = dataItemsMap.List()
 	return receivers
 }
