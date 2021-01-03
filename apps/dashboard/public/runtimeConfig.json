@@ -1,0 +1,4 @@
+{
+  "API_SERVER_URL": "http://localhost:8085",
+  "POLL_INTERVAL": 5000
+}

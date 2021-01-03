@@ -63,6 +63,6 @@ func (m *MetricItem) SetMemory(value float64) *MetricItem {
 	return m
 }
 func (m *MetricItem) SetMemoryUtilization(value float64) *MetricItem {
-	m.MemoryUtilization = fmt.Sprintf("%s", humanize.CommafWithDigits(value*100, 2))
+	m.MemoryUtilization = fmt.Sprintf("%s", humanize.CommafWithDigits(value, 2))
 	return m
 }

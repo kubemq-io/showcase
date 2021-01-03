@@ -29,14 +29,12 @@ func Start(ctx context.Context, collector *collector.Collector, kubemqService *k
 	s.echoWebServer.Use(middleware.Recover())
 	s.echoWebServer.Use(middleware.CORS())
 	s.echoWebServer.HideBanner = true
-	s.echoWebServer.Static("/dashboard", "./dist")
+
 	s.echoWebServer.GET("/health", func(c echo.Context) error {
 		return c.String(200, "ok")
 	})
 	s.echoWebServer.GET("/ready", func(c echo.Context) error {
-
 		return c.String(200, "ready")
-
 	})
 	s.echoWebServer.POST("/report", func(c echo.Context) error {
 		m := &base.Metric{}
@@ -83,6 +81,9 @@ func Start(ctx context.Context, collector *collector.Collector, kubemqService *k
 
 		return c.JSONPretty(200, s.collector.Bucket(c.Param("source"), count), "\t")
 	})
+
+	s.echoWebServer.Static("/*", "./dist")
+
 	errCh := make(chan error, 1)
 	go func() {
 		errCh <- s.echoWebServer.Start(fmt.Sprintf("0.0.0.0:%d", port))

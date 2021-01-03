@@ -68,7 +68,7 @@ export default {
   name: "Kubemq",
   components: {DataCard},
   props:[
-    'baseUrl','pollInterval'
+
   ],
   data () {
     return {
@@ -103,11 +103,11 @@ export default {
     pollData () {
       this.polling = setInterval(() => {
         this.getData()
-      }, this.pollInterval)
+      }, this.POLL_INTERVAL)
     },
     getData: function () {
       axios
-          .get(this.baseUrl+`/kubemq`)
+          .get(this.API_SERVER_URL+`/kubemq`)
           .then(response =>  this.items=response.data)
           .catch(()=> this.items={})
     },

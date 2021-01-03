@@ -35,7 +35,6 @@ import EventBus from '../event-bus';
 export default {
   name: "Senders",
   props:[
-      'baseUrl','pollInterval'
   ],
   data: function () {
     return {
@@ -65,11 +64,11 @@ export default {
     pollData () {
       this.polling = setInterval(() => {
        this.getData()
-      }, this.pollInterval)
+      }, this.POLL_INTERVAL)
     },
     getData: function () {
       axios
-          .get(this.baseUrl+`/senders`)
+          .get(this.API_SERVER_URL+`/senders`)
           .then(response =>  this.items=response.data)
           .catch(()=> this.items={})
     },

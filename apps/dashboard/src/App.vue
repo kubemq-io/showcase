@@ -51,7 +51,8 @@ export default {
   components: {
     Main,
   },
-created() {
+
+  created() {
     document.title='KubeMQ Showcase Dashboard'
 },
   data: () => ({

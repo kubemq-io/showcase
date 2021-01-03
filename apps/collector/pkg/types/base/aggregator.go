@@ -92,6 +92,7 @@ func (a *Aggregator) Add(m *Metric) {
 	a.Messages.Add(m.Messages)
 	a.Errors.Add(m.Errors)
 	a.LastUpdate = time.Now().UTC()
+
 }
 
 func (a *Aggregator) Clear() {

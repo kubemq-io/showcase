@@ -5,16 +5,16 @@
         class="mb-6"
     >
       <v-col>
-        <Senders base-url="http://localhost:8085" poll-interval="5000"></Senders>
+        <Senders></Senders>
       </v-col>
       <v-col >
-        <Receivers base-url="http://localhost:8085" poll-interval="5000"></Receivers>
+        <Receivers></Receivers>
       </v-col>
     </v-row>
     <v-row class="mb-6">
       <v-col
       >
-        <Kubemq base-url="http://localhost:8085" poll-interval="5000"></Kubemq>
+        <Kubemq></Kubemq>
       </v-col>
     </v-row>
   <v-row>
@@ -47,10 +47,7 @@ name: "Main",
   clear () {
     EventBus.$emit('clear', null);
     axios
-        .post("http://localhost:8085"+`/clear`)
-
-
-
+        .post(this.API_SERVER_URL+`/clear`)
   }
   },
 }

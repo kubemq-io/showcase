@@ -65,7 +65,7 @@ func (s *System) SetCPUUtilization(lastUptime, lastCpuSeconds float64) *System {
 }
 func (s *System) Calc() *System {
 	s.Uptime = float64(time.Now().Unix()) - s.StartTime
-	memUtilL := (s.ProcessMemoryAllocation / s.ProcessMemory) * 100
+	memUtilL := s.ProcessMemoryAllocation / s.ProcessMemory
 	s.MemoryUtilization = math.Round(memUtilL*100) / 100
 	return s
 }
