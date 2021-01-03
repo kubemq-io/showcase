@@ -4,6 +4,7 @@ tasks:
   default:
     cmds:
       - kubectl apply -f ./deployment.yaml -n apps
+      - kubectl apply -f ./config.yaml -n apps
       - kubectl apply -f ./service.yaml -n apps
   expose:
     cmds:
@@ -11,4 +12,5 @@ tasks:
   delete:
     cmds:
       - kubectl delete -f ./deployment.yaml -n apps
-      - kubectl delete -f ./delete.yaml -n apps
+      - kubectl delete -f ./config.yaml -n apps
+      - kubectl delete -f ./service.yaml -n apps

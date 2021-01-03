@@ -1,0 +1,23 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: kubemq-cluster
+  labels:
+    app: kubemq-cluster
+spec:
+  ports:
+    - name: api-port
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+    - name: grpc-port
+      protocol: TCP
+      port: 50000
+      targetPort: 50000
+    - name: rest-port
+      protocol: TCP
+      port: 9090
+      targetPort: 9090
+  selector:
+    app: kubemq-cluster
+  clusterIP: None

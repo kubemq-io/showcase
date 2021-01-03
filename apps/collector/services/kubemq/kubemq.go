@@ -36,10 +36,10 @@ func (s *Service) Start(ctx context.Context) {
 }
 func (s *Service) getStatus(ctx context.Context, host string) {
 	response := &kubemq.Response{}
-	url := fmt.Sprintf("http://%s%s?host=%s&source=queues", host, statusEndPoint, host)
+	url := fmt.Sprintf("http://%s%s", host, statusEndPoint)
 	_, err := s.restyClient.R().SetContext(ctx).SetResult(response).Get(url)
 	if err != nil {
-		log.Println(fmt.Sprintf("error get kubemq status from: %s", url))
+		log.Println(fmt.Sprintf("error get kubemq status from: %s, error: %s", url, err.Error()))
 		return
 	}
 	if len(response.Data) == 0 {

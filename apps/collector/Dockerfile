@@ -13,10 +13,9 @@ FROM registry.access.redhat.com/ubi8/ubi-minimal
 MAINTAINER KubeMQ info@kubemq.io
 ENV GOPATH=/go
 ENV PATH=$GOPATH/bin:$PATH
-RUN mkdir -p /opt/mqm/lib64
-COPY --from=builder /opt/mqm/lib64 /opt/mqm/lib64
 RUN mkdir /kubemq-collector
 COPY --from=builder $GOPATH/github.com/kubemq-hub/kubemq-collector/kubemq-collector-run ./kubemq-collector
+COPY --from=builder $GOPATH/github.com/kubemq-hub/kubemq-collector/dist ./kubemq-collector/dist
 RUN chown -R 1001:root  /kubemq-collector && chmod g+rwX  /kubemq-collector
 WORKDIR kubemq-collector
 USER 1001

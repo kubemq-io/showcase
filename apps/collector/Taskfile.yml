@@ -42,6 +42,5 @@ tasks:
       - docker push kubemq/{{.BINARY_NAME}}:latest
   release:
     cmds:
-      - task: lint
       - task: docker
       - task: push

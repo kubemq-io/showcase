@@ -37,3 +37,5 @@ tasks:
       - task: build
       - task: docker
       - task: push
+
+# sender --senders 10 --type queue --payloadSize 5000 --sendInterval 100 --sendBatch 100 --channel q1 --totalMessages 100000 --source sender-1 --hosts=localhost:50000,localhost:50001,localhost:50002

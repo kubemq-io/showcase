@@ -14,7 +14,10 @@ spec:
     spec:
       containers:
         - name: sender
-          image: 'docker.io/kubemq/showcase-collector:v0.2.0'
+          image: 'docker.io/kubemq/showcase-collector:v0.3.0'
+          envFrom:
+            - configMapRef:
+                name: collector
           ports:
             - name: api-port
               containerPort: 8085
